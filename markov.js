@@ -8,7 +8,7 @@ class MarkovMachine {
   constructor(text) {
     let words = text.split(/[ \r\n]+/);
     this.words = words.filter(c => c !== "");
-    this.makeChains();
+    this.chains = this.makeChains();
   }
 
   /** set markov chains:
@@ -17,23 +17,61 @@ class MarkovMachine {
    *  {"the": ["cat", "hat"], "cat": ["in"], "in": ["the"], "hat": [null]} */
 
   makeChains() {
-    // TODO
+    let chains = {};
+    for (let i = 0; i < this.words.length; i++){
+      if (this.words[i] in chains){
+        if (chains[this.words[i]].includes(this.words[i+1])){
+        }
+        else if (this.words[i + 1] === undefined) {
+          chains[this.words[i]].push(null);
+        }
+        else {
+          chains[this.words[i]].push(this.words[i + 1]);
+        }
+      }
+      else {
+        if (this.words[i + 1] === undefined) {
+          chains[this.words[i]] = [null];
+        }
+        else {
+          chains[this.words[i]] = [this.words[i + 1]];
+        }
+      }
+    }
+    return chains;
   }
 
 
   /** return random text from chains */
 
   makeText(numWords = 100) {
-    // TODO
+    // pick a starting word at random
+    let randomIndex = Math.floor(Math.random() * this.words.length);
+    let array = [this.words[randomIndex]];
+    // loop through number of words required
+    for (let i = 1; i < numWords; i++){
+      // pick a following word at random
+      const currentWord = array[i-1];
+      let randomIndex = Math.floor(Math.random() * this.chains[currentWord].length);
+      const nextWord = this.chains[currentWord][randomIndex];
+      if (nextWord === null){
+        let randomIndex = Math.floor(Math.random() * this.words.length);
+        array.push(this.words[randomIndex]);
+      }
+      else {
+        array.push(nextWord);
+      }
+    }
+    return array.join(' ');
   }
 }
 
-// Set up - project, git repo, package.json, node_modules in gitignore
-// Implement makeChains method
-// Implement makeText method
-// test in Node REPL
-// write tests with Jest
-//  write makeText script inc. handling errors
+module.exports = {
+  MarkovMachine: MarkovMachine
+}
+
+// write makeText script inc. handling errors
+// EXTRA CREDIT
 // implement machine only starts on a word that starts a sentence
 // implement machine stops at period while still honoring maximum number of words passedd in
 // implement bigrams
